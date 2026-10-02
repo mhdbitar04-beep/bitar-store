@@ -1,0 +1,222 @@
+erDiagram
+    USERS ||--o{ ADDRESSES : "has"
+    USERS ||--o{ ORDERS : "places"
+    USERS ||--o{ REVIEWS : "writes"
+    USERS ||--o{ WISHLIST_ITEMS : "saves"
+    USERS ||--o{ COUPON_REDEMPTIONS : "redeems"
+
+    CATEGORIES ||--o{ CATEGORIES : "parent of"
+    CATEGORIES ||--o{ PRODUCTS : "contains"
+
+    PRODUCTS ||--o{ PRODUCT_IMAGES : "has"
+    PRODUCTS ||--|{ PRODUCT_VARIANTS : "has (min 1)"
+    PRODUCTS ||--o{ REVIEWS : "receives"
+    PRODUCTS ||--o{ WISHLIST_ITEMS : "in"
+
+    ATTRIBUTES ||--o{ ATTRIBUTE_VALUES : "has"
+    PRODUCT_VARIANTS ||--o{ VARIANT_ATTRIBUTE_VALUE : "defined by"
+    ATTRIBUTE_VALUES ||--o{ VARIANT_ATTRIBUTE_VALUE : "used in"
+
+    COUPONS ||--o{ ORDERS : "applied to"
+    COUPONS ||--o{ COUPON_REDEMPTIONS : "tracked by"
+    ORDERS ||--o| COUPON_REDEMPTIONS : "records"
+
+    ORDERS ||--|{ ORDER_ITEMS : "contains"
+    PRODUCT_VARIANTS ||--o{ ORDER_ITEMS : "sold as"
+    PRODUCTS ||--o{ ORDER_ITEMS : "snapshot of"
+    ORDERS ||--o{ PAYMENTS : "paid by"
+    ORDERS ||--o{ ORDER_STATUS_HISTORIES : "tracked by"
+
+    USERS {
+        bigint id PK
+        string name
+        string email UK
+        string password
+        enum role "admin | customer"
+        string phone "nullable"
+        string avatar_path "nullable"
+        timestamp email_verified_at "nullable"
+        timestamps created_updated
+    }
+
+    ADDRESSES {
+        bigint id PK
+        bigint user_id FK
+        string label "Home / Work"
+        string full_name
+        string phone
+        string line1
+        string line2 "nullable"
+        string city
+        string state "nullable"
+        string postal_code
+        char country_code "ISO-2"
+        boolean is_default
+    }
+
+    CATEGORIES {
+        bigint id PK
+        bigint parent_id FK "nullable, self"
+        string name
+        string slug UK
+        text description "nullable"
+        string image_path "nullable"
+        boolean is_active
+        int sort_order
+    }
+
+    PRODUCTS {
+        bigint id PK
+        bigint category_id FK
+        string name
+        string slug UK
+        string short_description
+        text description
+        int base_price "cents"
+        int compare_at_price "cents, nullable"
+        boolean is_active
+        boolean is_featured
+        decimal rating_avg "cached 0-5"
+        int reviews_count "cached"
+        int sold_count "cached"
+        timestamp deleted_at "soft delete"
+    }
+
+    PRODUCT_IMAGES {
+        bigint id PK
+        bigint product_id FK
+        string path
+        string alt "nullable"
+        int sort_order
+        boolean is_primary
+    }
+
+    ATTRIBUTES {
+        bigint id PK
+        string name "Color / Size / Storage / Volume"
+        string slug UK
+        enum type "select | color"
+    }
+
+    ATTRIBUTE_VALUES {
+        bigint id PK
+        bigint attribute_id FK
+        string value "Red / 42 / 256GB"
+        string color_hex "nullable"
+        int sort_order
+    }
+
+    PRODUCT_VARIANTS {
+        bigint id PK
+        bigint product_id FK
+        string sku UK
+        int price "cents, nullable = base_price"
+        int stock
+        boolean is_default
+        boolean is_active
+    }
+
+    VARIANT_ATTRIBUTE_VALUE {
+        bigint product_variant_id PK,FK
+        bigint attribute_value_id PK,FK
+    }
+
+    REVIEWS {
+        bigint id PK
+        bigint user_id FK
+        bigint product_id FK
+        tinyint rating "1-5"
+        string title "nullable"
+        text body
+        boolean is_verified_purchase
+        boolean is_approved
+    }
+
+    WISHLIST_ITEMS {
+        bigint id PK
+        bigint user_id FK
+        bigint product_id FK
+    }
+
+    COUPONS {
+        bigint id PK
+        string code UK
+        enum type "percent | fixed"
+        int value "percent or cents"
+        int min_order_amount "cents, nullable"
+        int max_discount "cents, nullable"
+        int usage_limit "nullable"
+        int per_user_limit "nullable"
+        int used_count
+        timestamp starts_at "nullable"
+        timestamp expires_at "nullable"
+        boolean is_active
+    }
+
+    COUPON_REDEMPTIONS {
+        bigint id PK
+        bigint coupon_id FK
+        bigint user_id FK
+        bigint order_id FK,UK
+        int discount_amount "cents"
+    }
+
+    ORDERS {
+        bigint id PK
+        string number UK "BS-2026-000123"
+        bigint user_id FK
+        bigint coupon_id FK "nullable"
+        enum status "pending|paid|processing|shipped|delivered|cancelled|refunded"
+        int subtotal "cents"
+        int discount_total "cents"
+        int shipping_total "cents"
+        int tax_total "cents"
+        int total "cents"
+        char currency "USD"
+        string coupon_code "snapshot, nullable"
+        json shipping_address "snapshot"
+        text notes "nullable"
+        timestamp paid_at "nullable"
+    }
+
+    ORDER_ITEMS {
+        bigint id PK
+        bigint order_id FK
+        bigint product_id FK "nullable"
+        bigint product_variant_id FK "nullable"
+        string product_name "snapshot"
+        string variant_label "snapshot: Red / 42"
+        string sku "snapshot"
+        string image_url "snapshot"
+        int unit_price "cents"
+        int quantity
+        int line_total "cents"
+    }
+
+    PAYMENTS {
+        bigint id PK
+        bigint order_id FK
+        string provider "stripe"
+        string provider_payment_id UK "pi_..."
+        int amount "cents"
+        char currency
+        enum status "pending|succeeded|failed|refunded"
+        json payload "nullable"
+    }
+
+    ORDER_STATUS_HISTORIES {
+        bigint id PK
+        bigint order_id FK
+        bigint changed_by FK "users.id, nullable"
+        string from_status "nullable"
+        string to_status
+        string note "nullable"
+        timestamp created_at
+    }
+
+    STRIPE_EVENTS {
+        bigint id PK
+        string event_id UK "idempotency"
+        string type
+        timestamp processed_at
+    }

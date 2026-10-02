@@ -1,0 +1,13 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Secrets — never commit real keys
+.env
+.env.*
+!.env.example
+
+# Local helper script
+publish-to-github.bat

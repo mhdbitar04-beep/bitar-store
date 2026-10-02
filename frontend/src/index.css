@@ -1,0 +1,155 @@
+@import 'tailwindcss';
+
+/* Class-based dark mode: <html class="dark"> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * BITAR STORE palette — black & gold.
+ * Dark is the signature look (default); light is an ivory variant with the same gold.
+ */
+:root {
+  --bg: #faf7f0;
+  --surface: #ffffff;
+  --surface-2: #f3eee2;
+  --line: #e6dcc6;
+  --fg: #141210;
+  --muted: #6d6556;
+  --gold: #a8841f;
+  --gold-soft: #c9a646;
+  --gold-strong: #8a6b14;
+  --on-gold: #0a0a0a;
+  --danger: #b42318;
+  --success: #1f7a4d;
+  --ring: rgb(168 132 31 / 0.45);
+  --shadow: 0 10px 30px -12px rgb(20 18 16 / 0.18);
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --surface: #121212;
+  --surface-2: #1a1917;
+  --line: #2a2723;
+  --fg: #f5efe0;
+  --muted: #a39b8a;
+  --gold: #d4af37;
+  --gold-soft: #f1d78a;
+  --gold-strong: #b8912a;
+  --on-gold: #0a0a0a;
+  --danger: #f97066;
+  --success: #47cd89;
+  --ring: rgb(212 175 55 / 0.5);
+  --shadow: 0 20px 40px -20px rgb(0 0 0 / 0.8);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-strong: var(--gold-strong);
+  --color-on-gold: var(--on-gold);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Playfair Display', ui-serif, Georgia, serif;
+
+  --shadow-card: var(--shadow);
+  --ease-lux: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+    min-height: 100dvh;
+    transition: background-color 250ms ease, color 250ms ease;
+  }
+  h1, h2, h3 {
+    @apply font-display tracking-tight;
+  }
+  ::selection {
+    background: var(--gold);
+    color: var(--on-gold);
+  }
+  :focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+  img {
+    @apply select-none;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .gold-text {
+    background: linear-gradient(100deg, var(--gold-strong), var(--gold-soft) 45%, var(--gold) 70%, var(--gold-strong));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .gold-gradient {
+    background: linear-gradient(135deg, var(--gold-soft), var(--gold) 45%, var(--gold-strong));
+  }
+  .gold-border {
+    border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-surface;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold tracking-[0.3em] text-gold uppercase;
+  }
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-fg;
+  }
+  .field {
+    @apply w-full rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-sm text-fg placeholder:text-muted transition-colors duration-200 outline-none focus:border-gold focus:ring-2 focus:ring-(--ring);
+  }
+  .field-error {
+    @apply mt-1 text-xs text-danger;
+  }
+}
+
+/* Backdrop for real product photos (transparent cut-outs) */
+.photo-bg {
+  background: radial-gradient(circle at 50% 38%, #fbf8f1, #e4dccb);
+}
+
+/* Grain-free subtle gold glow used behind hero content */
+.hero-glow {
+  background:
+    radial-gradient(60% 50% at 50% 40%, color-mix(in oklab, var(--gold) 22%, transparent), transparent 70%),
+    radial-gradient(40% 40% at 80% 80%, color-mix(in oklab, var(--gold-strong) 14%, transparent), transparent 70%);
+}
+
+/* Respect the OS "reduce motion" setting for CSS animations/transitions too. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
